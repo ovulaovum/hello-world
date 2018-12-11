@@ -11,11 +11,11 @@ def Simplex(IB,IN,A,b,x,c):
     Br=B.I                                      #单独维护B^-1
     y=Br*A
     r=c.T-c[IB].T*y
-    #def E(k,t,y):
-    #    E=np.mat(np.eye(m))
-    #    E[:,k]=-y[:,t]/y[k,t]
-    #    E[k,t]=1/y[k,t]
-    #    return E
+    def E(k,t,y):
+        E=np.mat(np.eye(m))
+        E[:,k]=-y[:,t]/y[k,t]
+        E[k,k]=1/y[k,t]
+        return E
     while not np.all(r[0,IN]>=0):               #判断是否为最优解
         t=np.argmin(r[0,IN])                    #确定列主元指标
         y[:,t]=Br*A[:,t]
@@ -32,9 +32,7 @@ def Simplex(IB,IN,A,b,x,c):
             IN[v]=IB[k]
             IB[k]=t                             #交换基指标
             N=((A.T)[IN]).T                     #更新N
-            #Br=E(k,t,y)*Br                      #更新B^-1
-            B=((A.T)[IB]).T 
-            Br=B.I
+            Br=E(k,t,y)*Br                      #更新B^-1
             r[0,IN]=c[IN].T-(N.T*Br.T*c[IB]).T  #更新检验数
     return x,z[0,0]    
 
