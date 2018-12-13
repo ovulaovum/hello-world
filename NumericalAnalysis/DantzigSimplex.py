@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-def Simplex(IB,IN,A,b,x,c):
-#指标基IB,IN,约束A,b,初始解x,检验数r,目标函数z=cx,均为为np.mat类型,向量应为列向量
+def Simplex(IB,IN,A,x,c):
+#指标基IB,IN,约束A,初始解x,检验数r,目标函数z=cx,均为为np.mat类型,向量应为列向量
     m=len(IB)
     n=len(x)
     #计算初始参数
@@ -37,14 +37,12 @@ def Simplex(IB,IN,A,b,x,c):
     return x,z[0,0]    
 
 A=np.mat([[1.,1.,1.,0.],[2.,0.5,0.,1.]])
-b=np.mat([5.,8.])
-b=b.T
 c=np.mat([-4.,-2.,0.,0.])
 c=c.T
 x=np.mat([0.,0.,5.,8.])
 x=x.T
 IB=np.array([2,3])
 IN=np.array([0,1])
-print(Simplex(IB,IN,A,b,x,c))
+print(Simplex(IB,IN,A,x,c))
 
     
