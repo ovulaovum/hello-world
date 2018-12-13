@@ -1,12 +1,17 @@
 # _*_ coding:utf-8 _*_
 import numpy as np
+def getA(n):
+    A=np.eye(n)
+    A=A+np.mat(np.tril(-np.ones(n),-1))
+    return A
 
 def HilbertMatrix(n):
     H=np.mat(np.zeros((n,n)))
     for i in range(n):
         for j in range(n):
-            H[i,j]=1/(i+j+1)
+            H[i,j]=1/(i+j+3)
     return H
+
 def cond(A):
     def RowSumNorm(A):
         A=np.abs(A)    
@@ -14,12 +19,10 @@ def cond(A):
         return np.max(B)
     return RowSumNorm(A)*RowSumNorm(A.I)
 
-#for i in range(2,7):
-#    print('%d阶希尔伯特矩阵的条件数为%d'%(i,cond(HilbertMatrix(i))))
-
-def b(n):
-    x=np.mat([1 for i in range(n)])
-    return x*HilbertMatrix(n)
+def getb(A):
+    n=len(A)
+    x=np.random.rand(n,1)
+    return x,A*x
 
 def PartialPivotingLU(A):
     n=len(A)
@@ -46,15 +49,14 @@ def PartialPivotingLU(A):
     return A,p
 
 def PartialPivotingSolve(A,b):
-    A=A.astype(float)
-    b=b.astype(float)
-    b=b.T
+    A=A.astype(np.float64)
+    b=b.astype(np.float64)
+    if np.shape(b)[0]==1:
+        b=b.T
     A,p=PartialPivotingLU(A)
     n=len(A)
     for i in range(n-1):
-            a=b[i]
-            b[i]=b[p[i]]
-            b[p[i]]=a
+        b[[i,p[i]]]=b[[p[i],i]]
     for i in range (1,n):
         for k in range(i):
             b[i]=b[i]-A[i,k]*b[k]
@@ -92,15 +94,14 @@ def CompletePivotingLU(A):
     return A,p,q
     
 def CompletePivotingSolve(A,b):
-    A=A.astype(float)
-    b=b.astype(float)
-    b=b.T
+    A=A.astype(np.float64)
+    b=b.astype(np.float64)
+    if np.shape(b)[0]==1:
+        b=b.T
     A,p,q=CompletePivotingLU(A)
     n=len(A)
     for i in range(n-1):
-        a=b[i]
-        b[i]=b[p[i]]
-        b[p[i]]=a
+        b[[i,p[i]]]=b[[p[i],i]]
     for i in range (1,n):
         for k in range(i):
             b[i]=b[i]-A[i,k]*b[k]
@@ -109,8 +110,41 @@ def CompletePivotingSolve(A,b):
         for k in range(i):
             b[n-1-i]=b[n-1-i]-A[n-1-i,n-1-k]*b[n-1-k]/A[n-1-i,n-1-i]        
     for i in range(1,n+1):
-        a=b[n-i]
-        b[n-i]=b[q[n-i]]
-        b[q[n-i]]=a
+        b[[n-i,q[n-i]]]=b[[q[n-i],n-i]]
     return b
-
+H=HilbertMatrix(12)
+A=getA(60)
+print(cond(H))
+print(cond(A))
+BackErrp=0
+ForErrp=0
+BackErrc=0
+ForErrc=0
+BackErrp2=0
+ForErrp2=0
+BackErrc2=0
+ForErrc2=0
+for i in range(10):
+    y,c=getb(H)
+    y_p=PartialPivotingSolve(H,c)
+    y_c=CompletePivotingSolve(H,c)
+    BackErrp+=np.linalg.norm(c-H*y_p,2)/10
+    ForErrp+=np.linalg.norm(y-y_p,2)/10 
+    BackErrc+=np.linalg.norm(c-H*y_c,2)/10  
+    ForErrc+=np.linalg.norm(y-y_c,2)/10     
+    A=getA(60)
+    x,b=getb(A)
+    x_p=PartialPivotingSolve(A,b)
+    x_c=CompletePivotingSolve(A,b)
+    BackErrp2+=np.linalg.norm(b-A*x_p,2)/10
+    ForErrp2+=np.linalg.norm(x-x_p,2)/10
+    BackErrc2+=np.linalg.norm(b-A*x_c,2)/10
+    ForErrc2+=np.linalg.norm(x-x_c,2)/10
+print('BackErrp=',BackErrp)
+print('ForErrp=',ForErrp)
+print('BackErrc=',BackErrc)
+print('ForErrc=',ForErrc)
+print('BackErrp=',BackErrp2)
+print('ForErrp=',ForErrp2)
+print('BackErrc=',BackErrc2)
+print('ForErrc=',ForErrc2)
