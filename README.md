@@ -1,2 +1,2 @@
 # hello-world
-To store my numerical analysis homework
+Code for homework, usually in python or matlab.
